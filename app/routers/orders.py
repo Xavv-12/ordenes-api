@@ -4,12 +4,12 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 
-from ..repository import OrderRepository, get_repo
+from ..repository_sql import SqlOrderRepository, get_repo
 from ..schemas import OrderIn, OrderOut, OrderStatus
 
 router = APIRouter(prefix="/orders", tags=["Órdenes"])
 
-Repo = Annotated[OrderRepository, Depends(get_repo)]
+Repo = Annotated[SqlOrderRepository, Depends(get_repo)]
 
 
 @router.post("", response_model=OrderOut, status_code=status.HTTP_201_CREATED)

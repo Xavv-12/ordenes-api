@@ -3,7 +3,7 @@
 from datetime import datetime
 from enum import Enum
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class OrderStatus(str, Enum):
@@ -20,6 +20,8 @@ class OrderIn(BaseModel):
 
 
 class OrderOut(OrderIn):
+    model_config = ConfigDict(from_attributes=True)  # permite leer objetos del ORM
+
     id: int
     total: float
     status: OrderStatus
