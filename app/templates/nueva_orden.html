@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block titulo %}Nueva orden{% endblock %}
+{% block contenido %}
+<h1>Nueva orden</h1>
+
+{% if aviso %}<p><mark>{{ aviso }}</mark></p>{% endif %}
+
+<form method="post" action="/web/ordenes/nueva">
+  <label>Cliente
+    {% if clientes %}
+    <select name="cliente" required>
+      <option value="">Elige un cliente</option>
+      {% for nombre in clientes %}
+      <option value="{{ nombre }}" {% if datos.cliente == nombre %}selected{% endif %}>{{ nombre }}</option>
+      {% endfor %}
+    </select>
+    {% else %}
+    <input name="cliente" value="{{ datos.cliente }}" required>
+    {% endif %}
+  </label>
+  {% if errores.cliente %}<small>{{ errores.cliente }}</small>{% endif %}
+
+  <label>Producto
+    <input name="producto" value="{{ datos.producto }}" required>
+  </label>
+  {% if errores.producto %}<small>{{ errores.producto }}</small>{% endif %}
+
+  <label>Cantidad
+    <input name="cantidad" type="number" value="{{ datos.cantidad }}">
+  </label>
+  {% if errores.cantidad %}<small>{{ errores.cantidad }}</small>{% endif %}
+
+  <label>Precio unitario
+    <input name="precio_unitario" type="number" step="0.01" value="{{ datos.precio_unitario }}">
+  </label>
+  {% if errores.precio_unitario %}<small>{{ errores.precio_unitario }}</small>{% endif %}
+
+  <button type="submit">Guardar orden</button>
+</form>
+{% endblock %}

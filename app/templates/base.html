@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}API de Órdenes{% endblock %}</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2.0.6/css/pico.min.css">
+</head>
+<body>
+  <main class="container">
+    <nav>
+      <ul><li><strong>Tienda</strong></li></ul>
+      <ul>
+        <li><a href="/web/ordenes">Órdenes</a></li>
+        <li><a href="/web/ordenes/nueva">Nueva orden</a></li>
+        <li><a href="/docs">API</a></li>
+      </ul>
+    </nav>
+    {% block contenido %}{% endblock %}
+  </main>
+</body>
+</html>

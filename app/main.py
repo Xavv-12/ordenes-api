@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from .routers import orders
+from .routers import orders, web
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -21,6 +21,9 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="API de Órdenes", version="0.2.0", lifespan=lifespan)
 app.include_router(orders.router)
+
+
+app.include_router(web.router)
 
 
 @app.get("/health")

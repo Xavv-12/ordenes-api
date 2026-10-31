@@ -1,22 +1,6 @@
-"""Pruebas de la API de Órdenes. Ejecutar con: pytest -v"""
-
-import pytest
-from fastapi.testclient import TestClient
-
-from app.main import app
-from app.repository import OrderRepository, get_repo
+"""Pruebas de la API de Órdenes. La fixture `client` está en conftest.py."""
 
 ORDEN = {"cliente": "Ana López", "producto": "Teclado", "cantidad": 2, "precio_unitario": 350.0}
-
-
-@pytest.fixture
-def client():
-    # Cada prueba usa un repositorio vacío
-    repo = OrderRepository()
-    app.dependency_overrides[get_repo] = lambda: repo
-    with TestClient(app) as c:
-        yield c
-    app.dependency_overrides.clear()
 
 
 def test_crear_orden_calcula_total(client):

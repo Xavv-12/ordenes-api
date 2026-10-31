@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block titulo %}Órdenes{% endblock %}
+{% block contenido %}
+<h1>Órdenes</h1>
+
+<form method="get" action="/web/ordenes">
+  <label>Filtrar por estado
+    <select name="estado" onchange="this.form.submit()">
+      <option value="">Todas</option>
+      {% for e in estados %}
+      <option value="{{ e.value }}" {% if estado == e.value %}selected{% endif %}>{{ e.value }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <noscript><button type="submit">Filtrar</button></noscript>
+</form>
+
+{% if ordenes %}
+<table>
+  <thead>
+    <tr><th>#</th><th>Cliente</th><th>Producto</th><th>Cantidad</th><th>Total</th><th>Estado</th></tr>
+  </thead>
+  <tbody>
+    {% for orden in ordenes %}
+    <tr>
+      <td>{{ orden.id }}</td>
+      <td>{{ orden.cliente }}</td>
+      <td>{{ orden.producto }}</td>
+      <td>{{ orden.cantidad }}</td>
+      <td>${{ "%.2f"|format(orden.total) }}</td>
+      <td>{{ orden.status.value }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>Todavía no hay órdenes. <a href="/web/ordenes/nueva">Crea la primera</a>.</p>
+{% endif %}
+{% endblock %}
