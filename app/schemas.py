@@ -26,3 +26,22 @@ class OrderOut(OrderIn):
     total: float
     status: OrderStatus
     creada: datetime
+
+
+class ComprobanteOut(BaseModel):
+    """Lo que la API muestra de un comprobante. La ruta en disco nunca se expone."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    order_id: int
+    nombre_original: str
+    tipo: str
+    tamano: int
+    subido: datetime
+
+
+class ComprobanteGuardado(ComprobanteOut):
+    """Uso interno: incluye la ruta del archivo para poder descargarlo."""
+
+    ruta: str

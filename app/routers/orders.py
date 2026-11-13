@@ -2,7 +2,7 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 
 from ..repository_sql import SqlOrderRepository, get_repo
 from ..schemas import OrderIn, OrderOut, OrderStatus
@@ -18,8 +18,13 @@ def crear_orden(data: OrderIn, repo: Repo) -> OrderOut:
 
 
 @router.get("", response_model=list[OrderOut])
-def listar_ordenes(repo: Repo, estado: OrderStatus | None = None) -> list[OrderOut]:
-    return repo.list(estado)
+def listar_ordenes(
+    repo: Repo,
+    estado: OrderStatus | None = None,
+    limit: Annotated[int, Query(ge=1, le=50)] = 10,  # cuántas por página
+    offset: Annotated[int, Query(ge=0)] = 0,  # cuántas saltar
+) -> list[OrderOut]:
+    return repo.list(estado, limit, offset)
 
 
 @router.get("/{order_id}", response_model=OrderOut)
