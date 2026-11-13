@@ -9,6 +9,7 @@ from sqlalchemy.pool import StaticPool
 from app.db import Base, get_session
 from app.main import app
 from app.services.clientes import ServicioNoDisponible, get_clientes_service
+from app.storage import get_upload_dir
 
 
 class ClientesFalso:
@@ -41,13 +42,20 @@ def sesiones():
 
 
 @pytest.fixture
-def client(clientes, sesiones):
+def carpeta(tmp_path):
+    """Carpeta temporal para los archivos subidos; pytest la borra al terminar."""
+    return tmp_path
+
+
+@pytest.fixture
+def client(clientes, sesiones, carpeta):
     def get_session_de_prueba():
         with sesiones() as session:
             yield session
 
     app.dependency_overrides[get_session] = get_session_de_prueba
     app.dependency_overrides[get_clientes_service] = lambda: clientes
+    app.dependency_overrides[get_upload_dir] = lambda: carpeta
     with TestClient(app) as c:
         yield c
     app.dependency_overrides.clear()

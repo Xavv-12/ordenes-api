@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block titulo %}Carrito{% endblock %}
+{% block contenido %}
+<h1>Tu carrito</h1>
+
+{% if errores.general %}<p><mark>{{ errores.general }}</mark></p>{% endif %}
+
+{% if carrito %}
+<table>
+  <thead><tr><th>Producto</th><th>Cantidad</th><th>Precio</th><th>Subtotal</th></tr></thead>
+  <tbody>
+    {% for item in carrito %}
+    <tr>
+      <td>{{ item.producto }}</td>
+      <td>{{ item.cantidad }}</td>
+      <td>${{ "%.2f"|format(item.precio_unitario) }}</td>
+      <td>${{ "%.2f"|format(item.cantidad * item.precio_unitario) }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+  <tfoot><tr><th colspan="3">Total</th><th>${{ "%.2f"|format(total) }}</th></tr></tfoot>
+</table>
+
+<form method="post" action="/web/carrito/confirmar">
+  <label>Tu nombre
+    <input name="cliente" required>
+  </label>
+  {% if errores.cliente %}<small>{{ errores.cliente }}</small>{% endif %}
+  <button type="submit">Confirmar compra</button>
+</form>
+<form method="post" action="/web/carrito/vaciar">
+  <button type="submit" class="secondary">Vaciar carrito</button>
+</form>
+{% else %}
+<p>Tu carrito está vacío.</p>
+{% endif %}
+
+<h2>Agregar producto</h2>
+<form method="post" action="/web/carrito/agregar">
+  <div class="grid">
+    <label>Producto <input name="producto"></label>
+    <label>Cantidad <input name="cantidad" type="number"></label>
+    <label>Precio <input name="precio_unitario" type="number" step="0.01"></label>
+  </div>
+  {% for campo, mensaje in errores.items() if campo != "general" and campo != "cliente" %}
+  <small>{{ campo }}: {{ mensaje }}</small>
+  {% endfor %}
+  <button type="submit">Agregar al carrito</button>
+</form>
+{% endblock %}
