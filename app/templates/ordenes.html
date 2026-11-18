@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 {% block titulo %}Órdenes{% endblock %}
 {% block contenido %}
 <h1>Órdenes</h1>
@@ -18,7 +18,7 @@
 {% if ordenes %}
 <table>
   <thead>
-    <tr><th>#</th><th>Cliente</th><th>Producto</th><th>Cantidad</th><th>Total</th><th>Estado</th></tr>
+    <tr><th>#</th><th>Cliente</th><th>Producto</th><th>Cantidad</th><th>Total</th><th>Estado</th><th>Comprobante</th></tr>
   </thead>
   <tbody>
     {% for orden in ordenes %}
@@ -29,6 +29,12 @@
       <td>{{ orden.cantidad }}</td>
       <td>${{ "%.2f"|format(orden.total) }}</td>
       <td>{{ orden.status.value }}</td>
+      <td>
+        <form action="/orders/{{ orden.id }}/comprobantes" method="post" enctype="multipart/form-data">
+          <input type="file" name="archivo" required>
+          <button type="submit">Subir</button>
+        </form>
+      </td>
     </tr>
     {% endfor %}
   </tbody>
