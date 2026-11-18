@@ -16,14 +16,14 @@ class ProductoRepository:
         self._items: dict[int, ProductoOut] = {}
         self._next_id = 1
 
+    def _sku_en_uso(self, sku: str, excepto_id: int | None = None) -> bool:
+        return any(p.sku == sku and p.id != excepto_id for p in self._items.values())
+
     def add(self, data: ProductoIn) -> ProductoOut:
-        # TODO 3
-        if any(p.sku == data.sku for p in self._items.values()):
-            raise SkuDuplicado
+        if self._sku_en_uso(data.sku):
+            raise SkuDuplicado(data.sku)
         producto = ProductoOut(
-            **data.model_dump(),
-            id=self._next_id,
-            disponible=data.existencias > 0,
+            **data.model_dump(), id=self._next_id, disponible=data.existencias > 0
         )
         self._items[producto.id] = producto
         self._next_id += 1
@@ -32,7 +32,6 @@ class ProductoRepository:
     def list(
         self, categoria: Categoria | None = None, solo_disponibles: bool = False
     ) -> list[ProductoOut]:
-        # TODO 4
         productos = list(self._items.values())
         if categoria is not None:
             productos = [p for p in productos if p.categoria == categoria]
@@ -44,33 +43,27 @@ class ProductoRepository:
         return self._items.get(producto_id)
 
     def update(self, producto_id: int, data: ProductoIn) -> ProductoOut | None:
-        # TODO 5
         if producto_id not in self._items:
             return None
-        if any(p.sku == data.sku and p.id != producto_id for p in self._items.values()):
-            raise SkuDuplicado
-        actualizado = ProductoOut(
-            **data.model_dump(),
-            id=producto_id,
-            disponible=data.existencias > 0,
-        )
-        self._items[producto_id] = actualizado
-        return actualizado
+        if self._sku_en_uso(data.sku, excepto_id=producto_id):
+            raise SkuDuplicado(data.sku)
+        producto = ProductoOut(**data.model_dump(), id=producto_id, disponible=data.existencias > 0)
+        self._items[producto_id] = producto
+        return producto
 
     def delete(self, producto_id: int) -> bool:
         return self._items.pop(producto_id, None) is not None
 
     def ajustar_existencias(self, producto_id: int, cantidad: int) -> ProductoOut | None:
-        # TODO 6
         actual = self._items.get(producto_id)
         if actual is None:
             return None
         nuevas = actual.existencias + cantidad
         if nuevas < 0:
-            raise ExistenciasInsuficientes
-        ajustado = actual.model_copy(update={"existencias": nuevas, "disponible": nuevas > 0})
-        self._items[producto_id] = ajustado
-        return ajustado
+            raise ExistenciasInsuficientes(nuevas)
+        producto = actual.model_copy(update={"existencias": nuevas, "disponible": nuevas > 0})
+        self._items[producto_id] = producto
+        return producto
 
 
 repo = ProductoRepository()

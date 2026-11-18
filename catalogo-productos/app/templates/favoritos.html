@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block titulo %}Favoritos{% endblock %}
+{% block contenido %}
+<h1>Tus favoritos</h1>
+{% if productos %}
+<table>
+  <thead><tr><th>SKU</th><th>Nombre</th><th>Precio</th><th></th></tr></thead>
+  <tbody>
+    {% for p in productos %}
+    <tr>
+      <td>{{ p.sku }}</td>
+      <td>{{ p.nombre }}</td>
+      <td>${{ "%.2f"|format(p.precio) }}</td>
+      <td>
+        <form method="post" action="/web/favoritos/{{ p.id }}/quitar">
+          <button type="submit" class="secondary">Quitar</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>Todavía no tienes favoritos.</p>
+{% endif %}
+{% endblock %}

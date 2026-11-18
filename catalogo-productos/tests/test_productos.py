@@ -1,13 +1,9 @@
-"""Especificación de la Práctica 3. NO modifiques este archivo.
+"""Las 16 pruebas de la Práctica 3, ahora sobre SQLite. NO modifiques este archivo.
 
-Tu trabajo está terminado cuando `pytest -v` muestra 16 passed.
+La fixture `client` está en conftest.py.
 """
 
 import pytest
-from fastapi.testclient import TestClient
-
-from app.main import app
-from app.repository import ProductoRepository, get_repo
 
 TECLADO = {
     "sku": "TEC-001",
@@ -23,15 +19,6 @@ MONITOR = {
     "existencias": 0,
     "categoria": "monitores",
 }
-
-
-@pytest.fixture
-def client():
-    repo = ProductoRepository()
-    app.dependency_overrides[get_repo] = lambda: repo
-    with TestClient(app) as c:
-        yield c
-    app.dependency_overrides.clear()
 
 
 # --- Crear y validar -------------------------------------------------------
