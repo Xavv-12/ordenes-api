@@ -7,7 +7,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from starlette.middleware.sessions import SessionMiddleware
 
-from .routers import carrito, comprobantes, orders, web
+from .routers import carrito, comprobantes, orders, productos, web
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -24,6 +24,7 @@ app.include_router(orders.router)
 app.include_router(web.router)
 app.include_router(comprobantes.router)
 app.include_router(carrito.router)
+app.include_router(productos.router)
 
 # La sesión se guarda en una cookie firmada con esta clave: si alguien la modifica,
 # la firma no coincide y se descarta. En producción la clave viene de una variable de entorno.

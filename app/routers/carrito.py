@@ -10,11 +10,14 @@ from pydantic import BaseModel, Field, ValidationError
 
 from ..repository_sql import SqlOrderRepository, get_repo
 from ..schemas import OrderIn
+from ..services.almacen import AlmacenService, ProductoNoRegistrado, get_almacen_service
+from ..services.clientes import ServicioNoDisponible
 
 router = APIRouter(prefix="/web/carrito", include_in_schema=False)
 templates = Jinja2Templates(directory=Path(__file__).parent.parent / "templates")
 
 Repo = Annotated[SqlOrderRepository, Depends(get_repo)]
+Almacen = Annotated[AlmacenService, Depends(get_almacen_service)]
 
 
 class ItemCarrito(BaseModel):
@@ -43,6 +46,7 @@ def ver_carrito(request: Request):
 @router.post("/agregar", response_class=HTMLResponse)
 def agregar_al_carrito(
     request: Request,
+    almacen: Almacen,
     producto: Annotated[str, Form()] = "",
     cantidad: Annotated[str, Form()] = "",
     precio_unitario: Annotated[str, Form()] = "",
@@ -52,6 +56,19 @@ def agregar_al_carrito(
     except ValidationError as error:
         errores = {e["loc"][0]: e["msg"] for e in error.errors()}
         return _pagina(request, errores, status_code=422)
+
+    # Antes de aceptar el producto, le preguntamos al almacén (SOAP) cuántos hay
+    try:
+        existencia = almacen.consultar_existencia(item.producto)
+    except ProductoNoRegistrado:
+        return _pagina(request, {"producto": "No existe en el almacén"}, status_code=422)
+    except ServicioNoDisponible:
+        aviso = {"general": "No pudimos revisar el almacén, intenta más tarde"}
+        return _pagina(request, aviso, status_code=503)
+    if item.cantidad > existencia:
+        aviso = {"cantidad": f"Solo hay {existencia} en existencia"}
+        return _pagina(request, aviso, status_code=422)
+
     carrito = leer_carrito(request)
     carrito.append(item.model_dump())
     request.session["carrito"] = carrito  # se reescribe la cookie en la respuesta

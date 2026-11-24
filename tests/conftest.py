@@ -8,6 +8,7 @@ from sqlalchemy.pool import StaticPool
 
 from app.db import Base, get_session
 from app.main import app
+from app.services.almacen import ProductoNoRegistrado, get_almacen_service
 from app.services.clientes import ServicioNoDisponible, get_clientes_service
 from app.storage import get_upload_dir
 
@@ -23,6 +24,26 @@ class ClientesFalso:
         if self.falla:
             raise ServicioNoDisponible("sin conexión")
         return self.nombres
+
+
+class AlmacenFalso:
+    """Sustituye al almacén SOAP: las pruebas no necesitan el servicio en el puerto 8001."""
+
+    def __init__(self, existencias: dict[str, int]) -> None:
+        self.existencias = existencias
+        self.falla = False
+
+    def consultar_existencia(self, producto: str) -> int:
+        if self.falla:
+            raise ServicioNoDisponible("sin conexión")
+        if producto not in self.existencias:
+            raise ProductoNoRegistrado(producto)
+        return self.existencias[producto]
+
+
+@pytest.fixture
+def almacen():
+    return AlmacenFalso({"Teclado": 50, "Mouse": 50, "Monitor": 3})
 
 
 @pytest.fixture
@@ -48,7 +69,7 @@ def carpeta(tmp_path):
 
 
 @pytest.fixture
-def client(clientes, sesiones, carpeta):
+def client(clientes, almacen, sesiones, carpeta):
     def get_session_de_prueba():
         with sesiones() as session:
             yield session
@@ -56,6 +77,7 @@ def client(clientes, sesiones, carpeta):
     app.dependency_overrides[get_session] = get_session_de_prueba
     app.dependency_overrides[get_clientes_service] = lambda: clientes
     app.dependency_overrides[get_upload_dir] = lambda: carpeta
+    app.dependency_overrides[get_almacen_service] = lambda: almacen
     with TestClient(app) as c:
         yield c
     app.dependency_overrides.clear()
